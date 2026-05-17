@@ -18,7 +18,28 @@ npm run build
 npm run preview
 ```
 
-Static output is written to `dist/` and can be deployed to any static host (GitHub Pages, Netlify, etc.).
+Static output is written to `dist/`. **Use the built `dist/index.html` on your phone** — not the project root `index.html` (that file only works with `npm run dev`).
+
+The production build is a **single self-contained HTML file** (all JS and CSS inlined), similar to the original app, so it works when:
+
+- Hosted on GitHub Pages, Netlify, or any static server
+- Opened from a subfolder (not only the domain root)
+- Added to the iPhone home screen (see below)
+
+### iPhone / “Add to Home Screen”
+
+1. Run `npm run build`.
+2. Upload **everything in `dist/`** to your host, or at minimum serve `dist/index.html` over **https** (required for a reliable home-screen web app).
+3. Open that URL in Safari → Share → **Add to Home Screen**.
+
+If you see a **white screen**, you are usually opening the wrong file:
+
+| File | Works on iPhone? |
+|------|------------------|
+| Project root `index.html` (before build) | No — needs the Vite dev server |
+| `dist/index.html` after `npm run build` | Yes |
+
+Your existing `localStorage` data is per-origin (per URL). If the home-screen URL changed, songs may appear “missing” until you use the same URL as before or import a backup.
 
 ## Tests
 
