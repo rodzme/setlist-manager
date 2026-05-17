@@ -1,0 +1,158 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+#app {
+  padding: 18px;
+  max-width: 900px;
+  margin: auto;
+}
+
+h1 {
+  margin: 0 0 14px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.subtitle {
+  color: var(--muted);
+}
+
+button,
+input,
+textarea,
+select {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 16px;
+}
+
+button.primary {
+  background: var(--accent);
+  color: #111;
+  font-weight: 700;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.toolbar input[type="search"] {
+  flex: 1;
+  min-width: 160px;
+}
+
+.card {
+  background: var(--panel);
+  padding: 14px;
+  border-radius: 18px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+}
+
+.card h3 {
+  margin: 0 0 6px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.lyrics-pre {
+  white-space: pre-wrap;
+  font-size: 20px;
+  line-height: 1.6;
+  background: var(--panel);
+  padding: 18px;
+  border-radius: 18px;
+  overflow: auto;
+  margin: 0;
+}
+
+.hidden {
+  display: none;
+}
+
+textarea {
+  width: 100%;
+  min-height: 300px;
+}
+
+input[type="text"],
+input:not([type]) {
+  width: 100%;
+}
+
+.viewer-panel {
+  padding-bottom: 120px;
+}
+
+.viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.viewer-header h2 {
+  margin: 0;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  background: #00000099;
+  padding: 10px;
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+}
+
+.controls button {
+  font-weight: 700;
+}
+
+.message {
+  padding: 12px 14px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.message.error {
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.spacer {
+  height: 12px;
+}
