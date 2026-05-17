@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Setlist Lyrics</title>
+<meta name="theme-color" content="#111111">
+<style>
+:root{
+--bg:#0f0f10;--panel:#1a1a1d;--text:#f4f4f5;--muted:#aaa;--line:#2d2d31;--accent:#f5b342;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+#app{padding:18px;max-width:900px;margin:auto}
+h1{margin:0 0 14px}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:center}
+button,input,textarea,select{
+border:1px solid var(--line);
+background:var(--panel);
+color:var(--text);
+border-radius:14px;
+padding:12px;
+font-size:16px;
+}
+button.primary{background:var(--accent);color:#111;font-weight:700}
+.toolbar{display:flex;gap:10px;margin-bottom:16px}
+.card{
+background:var(--panel);
+padding:14px;
+border-radius:18px;
+margin-bottom:12px;
+border:1px solid var(--line);
+}
+pre{
+white-space:pre-wrap;
+font-size:20px;
+line-height:1.6;
+background:var(--panel);
+padding:18px;
+border-radius:18px;
+overflow:auto;
+}
+.hidden{display:none}
+textarea{width:100%;min-height:300px}
+input{width:100%}
+#viewer{padding-bottom:120px}
+.controls{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:8px;
+background:#00000099;
+padding:10px;
+border-radius:999px;
+backdrop-filter:blur(10px);
+}
+.controls button{font-weight:700}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="top">
+<div>
+<h1>Setlist Lyrics</h1>
+<div style="color:var(--muted)">Simple lyrics + setlists</div>
+</div>
+<button class="primary" onclick="newSong()">+ Song</button>
+</div>
+
+<div class="toolbar">
+<input id="search" placeholder="Search songs..." oninput="render()">
+<button onclick="exportData()">Export</button>
+<input type="file" id="importFile" hidden>
+<button onclick="document.getElementById('importFile').click()">Import</button>
+</div>
+
+<div id="list"></div>
+
+<div id="editor" class="hidden">
+<div class="card">
+<h2 id="editTitle">Song</h2>
+<input id="songTitle" placeholder="Song title">
+<br><br>
+<input id="songArtist" placeholder="Artist">
+<br><br>
+<textarea id="songLyrics" placeholder="Paste lyrics here..."></textarea>
+<br><br>
+<div style="display:flex;gap:10px">
+<button class="primary" onclick="saveSong()">Save</button>
+<button onclick="cancelEdit()">Cancel</button>
+</div>
+</div>
+</div>
+
+<div id="viewer" class="hidden">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<div>
+<h2 id="viewTitle"></h2>
+<div id="viewArtist" style="color:var(--muted)"></div>
+</div>
+<button onclick="closeViewer()">Close</button>
+</div>
+
+<pre id="lyrics"></pre>
+
+<div class="controls">
+<button onclick="fontSize-=2;updateFont()">A-</button>
+<button onclick="fontSize+=2;updateFont()">A+</button>
+</div>
+</div>
+</div>
+
+<script>
+let songs = JSON.parse(localStorage.getItem("songs") || "[]");
+let editing = null;
+let fontSize = Number(localStorage.getItem("fontSize") || 20);
+
+function saveStorage(){
+localStorage.setItem("songs", JSON.stringify(songs));
+}
+
+function render(){
+const q = document.getElementById("search").value.toLowerCase();
+const list = document.getElementById("list");
+
+const filtered = songs.filter(s =>
+(s.title + " " + s.artist + " " + s.lyrics).toLowerCase().includes(q)
+);
+
+list.innerHTML = filtered.length ? filtered.map(song => `
+<div class="card">
+<h3>${song.title}</h3>
+<div style="color:var(--muted)">${song.artist || ""}</div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<button onclick="openSong('${song.id}')">Open</button>
+<button onclick="editSong('${song.id}')">Edit</button>
+<button onclick="deleteSong('${song.id}')">Delete</button>
+</div>
+</div>
+`).join("") : `<div class="card">No songs yet.</div>`;
+}
+
+function uid(){
+return Date.now().toString() + Math.random().toString(36).slice(2);
+}
+
+function newSong(){
+editing = null;
+document.getElementById("editor").classList.remove("hidden");
+document.getElementById("songTitle").value = "";
+document.getElementById("songArtist").value = "";
+document.getElementById("songLyrics").value = "";
+}
+
+function editSong(id){
+const song = songs.find(s => s.id === id);
+editing = id;
+document.getElementById("editor").classList.remove("hidden");
+document.getElementById("songTitle").value = song.title;
+document.getElementById("songArtist").value = song.artist;
+document.getElementById("songLyrics").value = song.lyrics;
+}
+
+function cancelEdit(){
+document.getElementById("editor").classList.add("hidden");
+}
+
+function saveSong(){
+const song = {
+id: editing || uid(),
+title: document.getElementById("songTitle").value,
+artist: document.getElementById("songArtist").value,
+lyrics: document.getElementById("songLyrics").value
+};
+
+if(editing){
+songs = songs.map(s => s.id === editing ? song : s);
+}else{
+songs.unshift(song);
+}
+
+saveStorage();
+cancelEdit();
+render();
+}
+
+function deleteSong(id){
+if(!confirm("Delete song?")) return;
+songs = songs.filter(s => s.id !== id);
+saveStorage();
+render();
+}
+
+function openSong(id){
+const song = songs.find(s => s.id === id);
+document.getElementById("viewer").classList.remove("hidden");
+document.getElementById("viewTitle").innerText = song.title;
+document.getElementById("viewArtist").innerText = song.artist;
+document.getElementById("lyrics").innerText = song.lyrics;
+updateFont();
+window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function closeViewer(){
+document.getElementById("viewer").classList.add("hidden");
+}
+
+function updateFont(){
+document.getElementById("lyrics").style.fontSize = fontSize + "px";
+localStorage.setItem("fontSize", fontSize);
+}
+
+function exportData(){
+const blob = new Blob([JSON.stringify(songs,null,2)], {type:"application/json"});
+const a = document.createElement("a");
+a.href = URL.createObjectURL(blob);
+a.download = "setlist-backup.json";
+a.click();
+}
+
+document.getElementById("importFile").addEventListener("change", async e => {
+const file = e.target.files[0];
+if(!file) return;
+songs = JSON.parse(await file.text());
+saveStorage();
+render();
+});
+
+render();
+updateFont();
+</script>
+</body>
+</html>
