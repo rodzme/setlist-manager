@@ -1,89 +1,26 @@
 # Setlist Manager
 
-A lightweight lyrics and song library for musicians. Songs are stored locally in the browser (`localStorage`).
+One HTML file. No build step. Songs saved in `localStorage`.
 
-## Development
+## Use locally
 
-```bash
-npm install
-npm run dev
-```
+Open [`index.html`](index.html) in a browser, or run any static server in this folder.
 
-Open the URL shown in the terminal (usually `http://localhost:5173`).
+## GitHub Pages
 
-## Build
+Live site: **https://rodzme.github.io/setlist-manager/**
 
-```bash
-npm run build
-npm run preview
-```
-
-Static output is written to `dist/`. **Use the built `dist/index.html` on your phone** — not the project root `index.html` (that file only works with `npm run dev`).
-
-The production build is a **single self-contained HTML file** (all JS and CSS inlined), similar to the original app, so it works when:
-
-- Hosted on GitHub Pages, Netlify, or any static server
-- Opened from a subfolder (not only the domain root)
-- Added to the iPhone home screen (see below)
-
-### iPhone / “Add to Home Screen”
-
-1. Run `npm run build`.
-2. Upload **everything in `dist/`** to your host, or at minimum serve `dist/index.html` over **https** (required for a reliable home-screen web app).
-3. Open that URL in Safari → Share → **Add to Home Screen**.
-
-If you see a **white screen**, you are usually opening the wrong file:
-
-| File | Works on iPhone? |
-|------|------------------|
-| Project root `index.html` (before build) | No — needs the Vite dev server |
-| `dist/index.html` after `npm run build` | Yes |
-
-Your existing `localStorage` data is per-origin (per URL). If the home-screen URL changed, songs may appear “missing” until you use the same URL as before or import a backup.
-
-### GitHub Pages (`rodzme.github.io/setlist-manager/`)
-
-GitHub must serve the **built** app, not the repo-root `index.html` (that file loads `/src/main.ts` and shows a white page).
-
-**One-time setup**
-
-1. On your machine: `npm run build:pages` (writes the production app to the `docs/` folder).
-2. Commit and push the `docs/` folder.
-3. On GitHub: **Settings → Pages → Build and deployment → Source:** **Deploy from a branch**.
-4. Branch: **main**, folder: **`/docs`** (not `/root`).
-
-After each code change, run `npm run build:pages` again and push `docs/` so the live site updates.
-
-**Alternative:** use **GitHub Actions** as the Pages source ([deploy workflow](.github/workflows/deploy-pages.yml)) instead of the `docs/` folder.
-
-### Console messages
-
-| Message | Meaning |
-|---------|---------|
-| `404` for `/src/main.ts` | Host is using dev `index.html`; run deploy workflow or upload `dist/` |
-| `404` for `/favicon.ico` | Harmless; a `favicon.svg` is included after build |
-| `apple-mobile-web-app-capable` deprecated | Informational; `mobile-web-app-capable` is included as well |
-
-## Tests
+1. The app lives in [`docs/index.html`](docs/index.html) (same file as the root copy).
+2. On GitHub: **Settings → Pages → Source:** branch **main**, folder **`/docs`**.
+3. After edits, copy `index.html` to `docs/index.html` and push both.
 
 ```bash
-npm test
+# keep docs in sync after editing index.html
+cp index.html docs/index.html
 ```
-
-## Project structure
-
-| Layer | Path | Role |
-|-------|------|------|
-| Domain | `src/domain/` | `Song` types, validation, repository interfaces |
-| Application | `src/application/` | Use cases (CRUD, search, import/export) |
-| Infrastructure | `src/infrastructure/` | `localStorage` adapters, JSON backup parsing |
-| Presentation | `src/presentation/` | UI views, styles, routing state |
 
 ## Data
 
-- Songs: `localStorage` key `songs` (unchanged from the original single-page app)
-- Font size in viewer: `localStorage` key `fontSize`
-
-## Legacy
-
-The original monolithic app is kept as [`index.legacy.html`](index.legacy.html) for reference only. The app entry point is [`index.html`](index.html) + Vite.
+- Songs: `localStorage` key `songs`
+- Viewer font size: `localStorage` key `fontSize`
+- Export / Import: JSON backup
