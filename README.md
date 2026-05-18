@@ -41,6 +41,22 @@ If you see a **white screen**, you are usually opening the wrong file:
 
 Your existing `localStorage` data is per-origin (per URL). If the home-screen URL changed, songs may appear “missing” until you use the same URL as before or import a backup.
 
+### GitHub Pages
+
+If the site is `https://<user>.github.io/setlist-manager/` and the console shows **404** for `/src/main.ts`, GitHub is serving the **development** `index.html` from the repo root, not the built app.
+
+**Fix:** In the repo on GitHub → **Settings → Pages → Build and deployment → Source:** choose **GitHub Actions**, then push to `main`. The [deploy workflow](.github/workflows/deploy-pages.yml) runs `npm run build` and publishes `dist/` (one self-contained `index.html`).
+
+Do **not** set Pages source to “Deploy from branch / root” unless that branch only contains `dist/` output.
+
+### Console messages
+
+| Message | Meaning |
+|---------|---------|
+| `404` for `/src/main.ts` | Host is using dev `index.html`; run deploy workflow or upload `dist/` |
+| `404` for `/favicon.ico` | Harmless; a `favicon.svg` is included after build |
+| `apple-mobile-web-app-capable` deprecated | Informational; `mobile-web-app-capable` is included as well |
+
 ## Tests
 
 ```bash
