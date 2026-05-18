@@ -41,13 +41,20 @@ If you see a **white screen**, you are usually opening the wrong file:
 
 Your existing `localStorage` data is per-origin (per URL). If the home-screen URL changed, songs may appear “missing” until you use the same URL as before or import a backup.
 
-### GitHub Pages
+### GitHub Pages (`rodzme.github.io/setlist-manager/`)
 
-If the site is `https://<user>.github.io/setlist-manager/` and the console shows **404** for `/src/main.ts`, GitHub is serving the **development** `index.html` from the repo root, not the built app.
+GitHub must serve the **built** app, not the repo-root `index.html` (that file loads `/src/main.ts` and shows a white page).
 
-**Fix:** In the repo on GitHub → **Settings → Pages → Build and deployment → Source:** choose **GitHub Actions**, then push to `main`. The [deploy workflow](.github/workflows/deploy-pages.yml) runs `npm run build` and publishes `dist/` (one self-contained `index.html`).
+**One-time setup**
 
-Do **not** set Pages source to “Deploy from branch / root” unless that branch only contains `dist/` output.
+1. On your machine: `npm run build:pages` (writes the production app to the `docs/` folder).
+2. Commit and push the `docs/` folder.
+3. On GitHub: **Settings → Pages → Build and deployment → Source:** **Deploy from a branch**.
+4. Branch: **main**, folder: **`/docs`** (not `/root`).
+
+After each code change, run `npm run build:pages` again and push `docs/` so the live site updates.
+
+**Alternative:** use **GitHub Actions** as the Pages source ([deploy workflow](.github/workflows/deploy-pages.yml)) instead of the `docs/` folder.
 
 ### Console messages
 
