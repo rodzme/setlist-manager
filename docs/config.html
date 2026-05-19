@@ -38,12 +38,15 @@
     }
 
     #app {
-      padding: 24px 0;
+      padding-top: calc(env(safe-area-inset-top, 0px) + 18px);
+      padding-right: calc(env(safe-area-inset-right, 0px) + 16px);
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+      padding-left: calc(env(safe-area-inset-left, 0px) + 16px);
       max-width: 900px;
       margin: auto;
     }
 
-    h1 { margin: 24px 0 }
+    h1 { margin: 10px 0 18px }
 
     p {
       margin: 0 0 14px;
