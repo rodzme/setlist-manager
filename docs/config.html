@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Setlist Sync Settings</title>
+  <meta name="theme-color" content="#111111">
+  <style>
+    :root {
+      --bg: #0f0f10;
+      --panel: #1a1a1d;
+      --text: #f4f4f5;
+      --muted: #aaa;
+      --line: #2d2d31;
+      --accent: #f5b342;
+      --ok: #4ade80;
+      --err: #f87171;
+    }
+
+    * { box-sizing: border-box }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    #app {
+      padding: 18px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h1 { margin: 0 0 14px }
+
+    button, input {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      position: relative;
+    }
+
+    .menu-wrap {
+      position: relative;
+    }
+
+    #btnMenu {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      padding: 0;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    #menuPanel {
+      position: absolute;
+      right: 0;
+      top: 58px;
+      width: 200px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 8px;
+      z-index: 30;
+    }
+
+    #menuPanel a {
+      display: block;
+      color: var(--text);
+      text-decoration: none;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    #menuPanel a:hover {
+      background: #ffffff14;
+    }
+
+    .hidden { display: none }
+
+    .sync-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      margin-top: 16px;
+    }
+
+    .sync-hint {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0 0 12px;
+      line-height: 1.4;
+    }
+
+    .sync-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .sync-row input { flex: 1; min-width: 140px }
+
+    .sync-status {
+      font-size: 14px;
+      margin-top: 8px;
+      color: var(--muted);
+    }
+
+    .sync-status.ok { color: var(--ok) }
+    .sync-status.err { color: var(--err) }
+
+    .sync-id-box {
+      font-family: ui-monospace, monospace;
+      font-size: 13px;
+      word-break: break-all;
+      background: var(--bg);
+      padding: 10px;
+      border-radius: 10px;
+      margin: 8px 0;
+      border: 1px solid var(--line);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="top">
+      <div>
+        <h1>Cloud Sync Settings</h1>
+        <div style="color:var(--muted)">Configure JSONBin once, then sync songs across devices</div>
+      </div>
+      <div class="menu-wrap">
+        <button type="button" id="btnMenu" aria-expanded="false" aria-controls="menuPanel">&#9776;</button>
+        <nav id="menuPanel" class="hidden">
+          <a href="index.html">Songs</a>
+          <a href="config.html">Cloud Sync Settings</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="sync-card">
+      <p class="sync-hint">
+        Free <a href="https://jsonbin.io" target="_blank" rel="noopener" style="color:var(--accent)">JSONBin.io</a>
+        account -> copy your <strong>X-Master-Key</strong> -> paste below on both devices.
+        Use the same Sync ID on each device.
+      </p>
+      <div class="sync-row">
+        <input type="password" id="syncApiKey" placeholder="JSONBin X-Master-Key" autocomplete="off">
+      </div>
+      <div class="sync-row">
+        <input type="text" id="syncBinId" placeholder="Sync ID (bin id)" autocomplete="off">
+        <button type="button" id="btnSyncSave">Save</button>
+      </div>
+      <div class="sync-row">
+        <button type="button" id="btnSyncNew">Create new cloud backup</button>
+        <button type="button" id="btnSyncNow">Sync now</button>
+      </div>
+      <div id="syncIdDisplay" class="hidden">
+        <div style="color:var(--muted);font-size:14px">Your Sync ID (copy to your other device):</div>
+        <div class="sync-id-box" id="syncIdText"></div>
+        <button type="button" id="btnCopySyncId">Copy Sync ID</button>
+      </div>
+      <div class="sync-status" id="syncStatus">Sync not configured</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var STORAGE_SONGS = "songs";
+      var STORAGE_FONT = "fontSize";
+      var STORAGE_UPDATED = "songsUpdatedAt";
+      var STORAGE_SYNC_KEY = "jsonbinMasterKey";
+      var STORAGE_SYNC_BIN = "jsonbinBinId";
+      var JSONBIN_API = "https://api.jsonbin.io/v3/b";
+
+      var songs = [];
+      var localUpdatedAt = 0;
+      var fontSize = Number(localStorage.getItem(STORAGE_FONT) || 20);
+
+      try {
+        songs = JSON.parse(localStorage.getItem(STORAGE_SONGS) || "[]");
+        if (!Array.isArray(songs)) songs = [];
+      } catch (e) {
+        songs = [];
+      }
+      localUpdatedAt = Number(localStorage.getItem(STORAGE_UPDATED) || 0) || 0;
+
+      var syncStatusEl = document.getElementById("syncStatus");
+      var syncBusy = false;
+      var menuPanel = document.getElementById("menuPanel");
+      var btnMenu = document.getElementById("btnMenu");
+
+      function getSyncConfig() {
+        return {
+          key: (localStorage.getItem(STORAGE_SYNC_KEY) || "").trim(),
+          binId: (localStorage.getItem(STORAGE_SYNC_BIN) || "").trim()
+        };
+      }
+
+      function setSyncStatus(msg, type) {
+        syncStatusEl.textContent = msg;
+        syncStatusEl.className = "sync-status" + (type ? " " + type : "");
+      }
+
+      function payload() {
+        return {
+          songs: songs,
+          fontSize: fontSize,
+          updatedAt: localUpdatedAt
+        };
+      }
+
+      function jsonbinHeaders(key) {
+        return {
+          "Content-Type": "application/json",
+          "X-Master-Key": key
+        };
+      }
+
+      function showSyncId(binId) {
+        document.getElementById("syncIdDisplay").classList.remove("hidden");
+        document.getElementById("syncIdText").textContent = binId;
+      }
+
+      function loadSyncUi() {
+        var c = getSyncConfig();
+        if (c.key) document.getElementById("syncApiKey").value = c.key;
+        if (c.binId) {
+          document.getElementById("syncBinId").value = c.binId;
+          showSyncId(c.binId);
+          setSyncStatus("Sync ready - " + songs.length + " song(s) local", "ok");
+        }
+      }
+
+      function pushToCloud() {
+        var c = getSyncConfig();
+        if (!c.key || !c.binId || syncBusy) return Promise.resolve();
+        syncBusy = true;
+        setSyncStatus("Uploading...");
+
+        return fetch(JSONBIN_API + "/" + encodeURIComponent(c.binId), {
+          method: "PUT",
+          headers: jsonbinHeaders(c.key),
+          body: JSON.stringify(payload())
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error("Upload failed (" + res.status + ")");
+            setSyncStatus("Cloud saved - " + new Date().toLocaleTimeString(), "ok");
+          })
+          .catch(function (err) {
+            setSyncStatus("Upload failed: " + err.message, "err");
+          })
+          .finally(function () {
+            syncBusy = false;
+          });
+      }
+
+      function applyPayload(data) {
+        if (!data || typeof data !== "object") return false;
+        var remoteSongs = Array.isArray(data.songs) ? data.songs : [];
+        var remoteAt = Number(data.updatedAt) || 0;
+        var remoteFont = Number(data.fontSize);
+
+        if (remoteAt > localUpdatedAt) {
+          songs = remoteSongs;
+          localUpdatedAt = remoteAt;
+          if (isFinite(remoteFont)) fontSize = remoteFont;
+          localStorage.setItem(STORAGE_SONGS, JSON.stringify(songs));
+          localStorage.setItem(STORAGE_UPDATED, String(localUpdatedAt));
+          localStorage.setItem(STORAGE_FONT, String(fontSize));
+          return true;
+        }
+        return false;
+      }
+
+      function pullFromCloud() {
+        var c = getSyncConfig();
+        if (!c.key || !c.binId) {
+          setSyncStatus("Enter API key and Sync ID, then Save", "err");
+          return Promise.resolve();
+        }
+        if (syncBusy) return Promise.resolve();
+        syncBusy = true;
+        setSyncStatus("Downloading...");
+
+        return fetch(JSONBIN_API + "/" + encodeURIComponent(c.binId) + "/latest", {
+          headers: { "X-Master-Key": c.key }
+        })
+          .then(function (res) {
+            if (res.status === 404) throw new Error("Sync ID not found - check the bin id");
+            if (!res.ok) throw new Error("Download failed (" + res.status + ")");
+            return res.json();
+          })
+          .then(function (body) {
+            var record = body.record;
+            if (record && record.updatedAt === undefined && Array.isArray(record)) {
+              record = { songs: record, updatedAt: 0, fontSize: fontSize };
+            }
+            var pulled = applyPayload(record);
+            if (pulled) {
+              setSyncStatus("Synced from cloud - " + songs.length + " song(s)", "ok");
+            } else {
+              setSyncStatus("Already up to date - " + songs.length + " song(s)", "ok");
+            }
+            if (localUpdatedAt > (record && record.updatedAt ? record.updatedAt : 0)) {
+              return pushToCloud();
+            }
+          })
+          .catch(function (err) {
+            setSyncStatus("Sync failed: " + err.message, "err");
+          })
+          .finally(function () {
+            syncBusy = false;
+          });
+      }
+
+      function saveSyncSettings() {
+        var key = document.getElementById("syncApiKey").value.trim();
+        var binId = document.getElementById("syncBinId").value.trim();
+        if (!key) {
+          alert("Paste your JSONBin X-Master-Key first.");
+          return;
+        }
+        if (!binId) {
+          alert("Paste a Sync ID, or tap Create new cloud backup first.");
+          return;
+        }
+        localStorage.setItem(STORAGE_SYNC_KEY, key);
+        localStorage.setItem(STORAGE_SYNC_BIN, binId);
+        showSyncId(binId);
+        setSyncStatus("Settings saved - syncing...", "ok");
+        pullFromCloud().then(function () {
+          pushToCloud();
+        });
+      }
+
+      function createCloudBackup() {
+        var key = document.getElementById("syncApiKey").value.trim();
+        if (!key) {
+          alert("Paste your JSONBin X-Master-Key first.");
+          return;
+        }
+        localStorage.setItem(STORAGE_SYNC_KEY, key);
+        setSyncStatus("Creating cloud backup...");
+
+        fetch(JSONBIN_API, {
+          method: "POST",
+          headers: Object.assign(jsonbinHeaders(key), {
+            "X-Bin-Name": "setlist-lyrics-sync",
+            "X-Bin-Private": "true"
+          }),
+          body: JSON.stringify(payload())
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error("Create failed (" + res.status + ")");
+            return res.json();
+          })
+          .then(function (data) {
+            var binId = data.metadata && data.metadata.id;
+            if (!binId) throw new Error("No bin id returned");
+            localStorage.setItem(STORAGE_SYNC_BIN, binId);
+            document.getElementById("syncBinId").value = binId;
+            showSyncId(binId);
+            setSyncStatus("Created! Copy Sync ID to your other device.", "ok");
+          })
+          .catch(function (err) {
+            setSyncStatus("Create failed: " + err.message, "err");
+          });
+      }
+
+      function toggleMenu(forceOpen) {
+        var open = typeof forceOpen === "boolean" ? forceOpen : menuPanel.classList.contains("hidden");
+        menuPanel.classList.toggle("hidden", !open);
+        btnMenu.setAttribute("aria-expanded", open ? "true" : "false");
+      }
+
+      document.getElementById("btnSyncSave").addEventListener("click", saveSyncSettings);
+      document.getElementById("btnSyncNew").addEventListener("click", createCloudBackup);
+      document.getElementById("btnSyncNow").addEventListener("click", function () {
+        pullFromCloud().then(function () { pushToCloud(); });
+      });
+      document.getElementById("btnCopySyncId").addEventListener("click", function () {
+        var id = document.getElementById("syncIdText").textContent;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(id).then(function () {
+            setSyncStatus("Sync ID copied", "ok");
+          });
+        } else {
+          prompt("Copy Sync ID:", id);
+        }
+      });
+
+      btnMenu.addEventListener("click", function (e) {
+        e.stopPropagation();
+        toggleMenu();
+      });
+      document.addEventListener("click", function (e) {
+        if (!menuPanel.contains(e.target) && e.target !== btnMenu) {
+          toggleMenu(false);
+        }
+      });
+
+      loadSyncUi();
+    })();
+  </script>
+</body>
+
+</html>

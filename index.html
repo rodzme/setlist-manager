@@ -18,8 +18,6 @@
       --muted: #aaa;
       --line: #2d2d31;
       --accent: #f5b342;
-      --ok: #4ade80;
-      --err: #f87171;
     }
 
     * { box-sizing: border-box }
@@ -39,13 +37,6 @@
 
     h1 { margin: 0 0 14px }
 
-    .top {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: center;
-    }
-
     button, input, textarea, select {
       border: 1px solid var(--line);
       background: var(--panel);
@@ -61,7 +52,52 @@
       font-weight: 700;
     }
 
-    button:disabled { opacity: 0.5 }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      position: relative;
+    }
+
+    .menu-wrap {
+      position: relative;
+    }
+
+    #btnMenu {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      padding: 0;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    #menuPanel {
+      position: absolute;
+      right: 0;
+      top: 58px;
+      width: 200px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 8px;
+      z-index: 30;
+    }
+
+    #menuPanel a {
+      display: block;
+      color: var(--text);
+      text-decoration: none;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    #menuPanel a:hover {
+      background: #ffffff14;
+    }
+
+    .hidden { display: none }
 
     .toolbar {
       display: flex;
@@ -70,55 +106,9 @@
       flex-wrap: wrap;
     }
 
-    .toolbar input { flex: 1; min-width: 160px }
-
-    .sync-card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px;
-      margin-bottom: 16px;
-    }
-
-    .sync-card h2 {
-      margin: 0 0 8px;
-      font-size: 1rem;
-    }
-
-    .sync-hint {
-      color: var(--muted);
-      font-size: 14px;
-      margin: 0 0 12px;
-      line-height: 1.4;
-    }
-
-    .sync-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 8px;
-    }
-
-    .sync-row input { flex: 1; min-width: 140px }
-
-    .sync-status {
-      font-size: 14px;
-      margin-top: 8px;
-      color: var(--muted);
-    }
-
-    .sync-status.ok { color: var(--ok) }
-    .sync-status.err { color: var(--err) }
-
-    .sync-id-box {
-      font-family: ui-monospace, monospace;
-      font-size: 13px;
-      word-break: break-all;
-      background: var(--bg);
-      padding: 10px;
-      border-radius: 10px;
-      margin: 8px 0;
-      border: 1px solid var(--line);
+    .toolbar input {
+      flex: 1;
+      min-width: 160px;
     }
 
     .card {
@@ -127,6 +117,14 @@
       border-radius: 18px;
       margin-bottom: 12px;
       border: 1px solid var(--line);
+    }
+
+    .group-heading {
+      font-size: 0.95rem;
+      margin: 22px 0 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
 
     pre {
@@ -138,8 +136,6 @@
       border-radius: 18px;
       overflow: auto;
     }
-
-    .hidden { display: none }
 
     textarea { width: 100%; min-height: 300px }
     input { width: 100% }
@@ -182,37 +178,26 @@
         <h1>Setlist Lyrics</h1>
         <div style="color:var(--muted)">Simple lyrics + setlists</div>
       </div>
-      <button type="button" class="primary" id="btnNew">+ Song</button>
-    </div>
-
-    <div class="sync-card" id="syncCard">
-      <h2>Cloud sync (PC ↔ iPhone)</h2>
-      <p class="sync-hint">
-        Free <a href="https://jsonbin.io" target="_blank" rel="noopener" style="color:var(--accent)">JSONBin.io</a>
-        account → copy your <strong>X-Master-Key</strong> → paste below on <em>both</em> devices.
-        Use the same Sync ID on each device.
-      </p>
-      <div class="sync-row">
-        <input type="password" id="syncApiKey" placeholder="JSONBin X-Master-Key" autocomplete="off">
+      <div style="display:flex;gap:8px;align-items:center">
+        <button type="button" class="primary" id="btnNew">+ Song</button>
+        <div class="menu-wrap">
+          <button type="button" id="btnMenu" aria-expanded="false" aria-controls="menuPanel">&#9776;</button>
+          <nav id="menuPanel" class="hidden">
+            <a href="index.html">Songs</a>
+            <a href="config.html">Cloud Sync Settings</a>
+          </nav>
+        </div>
       </div>
-      <div class="sync-row">
-        <input type="text" id="syncBinId" placeholder="Sync ID (bin id)" autocomplete="off">
-        <button type="button" id="btnSyncSave">Save</button>
-      </div>
-      <div class="sync-row">
-        <button type="button" id="btnSyncNew">Create new cloud backup</button>
-        <button type="button" id="btnSyncNow">Sync now</button>
-      </div>
-      <div id="syncIdDisplay" class="hidden">
-        <div style="color:var(--muted);font-size:14px">Your Sync ID (copy to your other device):</div>
-        <div class="sync-id-box" id="syncIdText"></div>
-        <button type="button" id="btnCopySyncId">Copy Sync ID</button>
-      </div>
-      <div class="sync-status" id="syncStatus">Sync not configured</div>
     </div>
 
     <div class="toolbar">
       <input id="search" placeholder="Search songs...">
+      <select id="groupMode">
+        <option value="none">No grouping</option>
+        <option value="artist">Group by artist</option>
+        <option value="alpha">Group alphabetically</option>
+        <option value="genre">Group by genre</option>
+      </select>
       <button type="button" id="btnExport">Export</button>
       <input type="file" id="importFile" accept="application/json,.json" hidden>
       <button type="button" id="btnImport">Import</button>
@@ -221,36 +206,38 @@
     <div id="list"></div>
 
     <div id="panelStash">
-    <div id="editor" class="hidden inline-panel">
-      <div class="card">
-        <h2>Song</h2>
-        <input id="songTitle" placeholder="Song title">
-        <br><br>
-        <input id="songArtist" placeholder="Artist">
-        <br><br>
-        <textarea id="songLyrics" placeholder="Paste lyrics here..."></textarea>
-        <br><br>
-        <div style="display:flex;gap:10px">
-          <button type="button" class="primary" id="btnSave">Save</button>
-          <button type="button" id="btnCancel">Cancel</button>
+      <div id="editor" class="hidden inline-panel">
+        <div class="card">
+          <h2>Song</h2>
+          <input id="songTitle" placeholder="Song title">
+          <br><br>
+          <input id="songArtist" placeholder="Artist">
+          <br><br>
+          <input id="songGenre" placeholder="Genre (optional)">
+          <br><br>
+          <textarea id="songLyrics" placeholder="Paste lyrics here..."></textarea>
+          <br><br>
+          <div style="display:flex;gap:10px">
+            <button type="button" class="primary" id="btnSave">Save</button>
+            <button type="button" id="btnCancel">Cancel</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div id="viewer" class="hidden inline-panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div>
-          <h2 id="viewTitle"></h2>
-          <div id="viewArtist" style="color:var(--muted)"></div>
+      <div id="viewer" class="hidden inline-panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div>
+            <h2 id="viewTitle"></h2>
+            <div id="viewArtist" style="color:var(--muted)"></div>
+          </div>
+          <button type="button" id="btnCloseViewer">Close</button>
         </div>
-        <button type="button" id="btnCloseViewer">Close</button>
+        <pre id="lyrics"></pre>
+        <div class="controls">
+          <button type="button" id="btnFontDown">A-</button>
+          <button type="button" id="btnFontUp">A+</button>
+        </div>
       </div>
-      <pre id="lyrics"></pre>
-      <div class="controls">
-        <button type="button" id="btnFontDown">A-</button>
-        <button type="button" id="btnFontUp">A+</button>
-      </div>
-    </div>
     </div>
   </div>
 
@@ -259,9 +246,7 @@
       var STORAGE_SONGS = "songs";
       var STORAGE_FONT = "fontSize";
       var STORAGE_UPDATED = "songsUpdatedAt";
-      var STORAGE_SYNC_KEY = "jsonbinMasterKey";
-      var STORAGE_SYNC_BIN = "jsonbinBinId";
-      var JSONBIN_API = "https://api.jsonbin.io/v3/b";
+      var STORAGE_GROUP = "songsGroupMode";
 
       var songs = [];
       var localUpdatedAt = 0;
@@ -282,10 +267,12 @@
       var viewerEl = document.getElementById("viewer");
       var stashEl = document.getElementById("panelStash");
       var toolbarEl = document.querySelector(".toolbar");
-      var syncStatusEl = document.getElementById("syncStatus");
-      var syncPushTimer = null;
-      var syncBusy = false;
       var activeCard = null;
+      var menuPanel = document.getElementById("menuPanel");
+      var btnMenu = document.getElementById("btnMenu");
+
+      var groupModeEl = document.getElementById("groupMode");
+      groupModeEl.value = localStorage.getItem(STORAGE_GROUP) || "none";
 
       function clearActiveCard() {
         if (activeCard) {
@@ -320,69 +307,9 @@
         });
       }
 
-      function getSyncConfig() {
-        return {
-          key: (localStorage.getItem(STORAGE_SYNC_KEY) || "").trim(),
-          binId: (localStorage.getItem(STORAGE_SYNC_BIN) || "").trim()
-        };
-      }
-
-      function syncConfigured() {
-        var c = getSyncConfig();
-        return !!(c.key && c.binId);
-      }
-
-      function setSyncStatus(msg, type) {
-        syncStatusEl.textContent = msg;
-        syncStatusEl.className = "sync-status" + (type ? " " + type : "");
-      }
-
-      function payload() {
-        return {
-          songs: songs,
-          fontSize: fontSize,
-          updatedAt: localUpdatedAt
-        };
-      }
-
-      function applyPayload(data, source) {
-        if (!data || typeof data !== "object") return false;
-        var remoteSongs = Array.isArray(data.songs) ? data.songs : [];
-        var remoteAt = Number(data.updatedAt) || 0;
-        var remoteFont = Number(data.fontSize);
-        var changed = false;
-
-        if (remoteAt > localUpdatedAt) {
-          songs = remoteSongs;
-          localUpdatedAt = remoteAt;
-          if (isFinite(remoteFont)) fontSize = remoteFont;
-          changed = true;
-        } else if (remoteAt < localUpdatedAt) {
-          return false;
-        } else if (remoteAt === localUpdatedAt && remoteAt > 0) {
-          return false;
-        } else {
-          var byId = {};
-          songs.forEach(function (s) { if (s && s.id) byId[s.id] = s; });
-          remoteSongs.forEach(function (s) { if (s && s.id) byId[s.id] = s; });
-          var merged = Object.keys(byId).map(function (k) { return byId[k]; });
-          if (merged.length !== songs.length) {
-            songs = merged;
-            changed = true;
-          }
-        }
-
-        if (changed) {
-          localStorage.setItem(STORAGE_SONGS, JSON.stringify(songs));
-          localStorage.setItem(STORAGE_UPDATED, String(localUpdatedAt));
-          localStorage.setItem(STORAGE_FONT, String(fontSize));
-          updateFont();
-          if (editorEl.classList.contains("hidden") && viewerEl.classList.contains("hidden")) {
-            render();
-          }
-          setSyncStatus("Synced from " + source + " · " + songs.length + " song(s)", "ok");
-        }
-        return changed;
+      function uid() {
+        if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+        return Date.now().toString() + Math.random().toString(36).slice(2);
       }
 
       function saveStorage() {
@@ -390,166 +317,87 @@
         localStorage.setItem(STORAGE_SONGS, JSON.stringify(songs));
         localStorage.setItem(STORAGE_UPDATED, String(localUpdatedAt));
         localStorage.setItem(STORAGE_FONT, String(fontSize));
-        scheduleCloudPush();
       }
 
-      function scheduleCloudPush() {
-        if (!syncConfigured()) return;
-        clearTimeout(syncPushTimer);
-        syncPushTimer = setTimeout(pushToCloud, 800);
+      function normalize(text) {
+        return (text || "").toString().trim();
       }
 
-      function jsonbinHeaders(key) {
-        return {
-          "Content-Type": "application/json",
-          "X-Master-Key": key
-        };
-      }
-
-      function pushToCloud() {
-        var c = getSyncConfig();
-        if (!c.key || !c.binId || syncBusy) return;
-        syncBusy = true;
-        setSyncStatus("Uploading…");
-
-        fetch(JSONBIN_API + "/" + encodeURIComponent(c.binId), {
-          method: "PUT",
-          headers: jsonbinHeaders(c.key),
-          body: JSON.stringify(payload())
-        })
-          .then(function (res) {
-            if (!res.ok) throw new Error("Upload failed (" + res.status + ")");
-            setSyncStatus("Cloud saved · " + new Date().toLocaleTimeString(), "ok");
-          })
-          .catch(function (err) {
-            setSyncStatus("Upload failed: " + err.message, "err");
-          })
-          .finally(function () {
-            syncBusy = false;
-          });
-      }
-
-      function pullFromCloud(silent) {
-        var c = getSyncConfig();
-        if (!c.key || !c.binId) {
-          if (!silent) setSyncStatus("Enter API key and Sync ID, then Save", "err");
-          return Promise.resolve();
+      function groupLabel(song, mode) {
+        if (mode === "artist") return normalize(song.artist) || "Unknown Artist";
+        if (mode === "genre") return normalize(song.genre) || "Unknown Genre";
+        if (mode === "alpha") {
+          var first = normalize(song.title).charAt(0).toUpperCase();
+          return /^[A-Z]$/.test(first) ? first : "#";
         }
-        if (syncBusy) return Promise.resolve();
-        syncBusy = true;
-        if (!silent) setSyncStatus("Downloading…");
-
-        return fetch(JSONBIN_API + "/" + encodeURIComponent(c.binId) + "/latest", {
-          headers: { "X-Master-Key": c.key }
-        })
-          .then(function (res) {
-            if (res.status === 404) throw new Error("Sync ID not found — check the bin id");
-            if (!res.ok) throw new Error("Download failed (" + res.status + ")");
-            return res.json();
-          })
-          .then(function (body) {
-            var record = body.record;
-            if (record && record.updatedAt === undefined && Array.isArray(record)) {
-              record = { songs: record, updatedAt: 0, fontSize: fontSize };
-            }
-            var pulled = applyPayload(record, "cloud");
-            if (!pulled && !silent) {
-              setSyncStatus("Already up to date · " + songs.length + " song(s)", "ok");
-            } else if (pulled && silent) {
-              setSyncStatus("Auto-synced · " + songs.length + " song(s)", "ok");
-            }
-            if (localUpdatedAt > (record && record.updatedAt ? record.updatedAt : 0)) {
-              return pushToCloud();
-            }
-          })
-          .catch(function (err) {
-            setSyncStatus("Sync failed: " + err.message, "err");
-          })
-          .finally(function () {
-            syncBusy = false;
-          });
+        return "All Songs";
       }
 
-      function saveSyncSettings() {
-        var key = document.getElementById("syncApiKey").value.trim();
-        var binId = document.getElementById("syncBinId").value.trim();
-        if (!key) {
-          alert("Paste your JSONBin X-Master-Key first.");
-          return;
-        }
-        if (!binId) {
-          alert("Paste a Sync ID, or tap \"Create new cloud backup\" on one device first.");
-          return;
-        }
-        localStorage.setItem(STORAGE_SYNC_KEY, key);
-        localStorage.setItem(STORAGE_SYNC_BIN, binId);
-        showSyncId(binId);
-        setSyncStatus("Settings saved — syncing…", "ok");
-        pullFromCloud(false).then(function () {
-          pushToCloud();
+      function sortedSongs(items, mode) {
+        return items.slice().sort(function (a, b) {
+          var ta = normalize(a.title).toLowerCase();
+          var tb = normalize(b.title).toLowerCase();
+          if (mode === "artist") {
+            var aa = normalize(a.artist).toLowerCase();
+            var ab = normalize(b.artist).toLowerCase();
+            if (aa < ab) return -1;
+            if (aa > ab) return 1;
+          }
+          if (mode === "genre") {
+            var ga = normalize(a.genre).toLowerCase();
+            var gb = normalize(b.genre).toLowerCase();
+            if (ga < gb) return -1;
+            if (ga > gb) return 1;
+          }
+          return ta < tb ? -1 : ta > tb ? 1 : 0;
         });
       }
 
-      function createCloudBackup() {
-        var key = document.getElementById("syncApiKey").value.trim();
-        if (!key) {
-          alert("Paste your JSONBin X-Master-Key first.");
-          return;
-        }
-        localStorage.setItem(STORAGE_SYNC_KEY, key);
-        setSyncStatus("Creating cloud backup…");
+      function renderSongCard(song) {
+        var card = document.createElement("div");
+        card.className = "card";
 
-        fetch(JSONBIN_API, {
-          method: "POST",
-          headers: Object.assign(jsonbinHeaders(key), {
-            "X-Bin-Name": "setlist-lyrics-sync",
-            "X-Bin-Private": "true"
-          }),
-          body: JSON.stringify(payload())
-        })
-          .then(function (res) {
-            if (!res.ok) throw new Error("Create failed (" + res.status + ")");
-            return res.json();
-          })
-          .then(function (data) {
-            var binId = data.metadata && data.metadata.id;
-            if (!binId) throw new Error("No bin id returned");
-            localStorage.setItem(STORAGE_SYNC_BIN, binId);
-            document.getElementById("syncBinId").value = binId;
-            showSyncId(binId);
-            setSyncStatus("Created! Copy Sync ID to your other device.", "ok");
-          })
-          .catch(function (err) {
-            setSyncStatus("Create failed: " + err.message, "err");
+        var h3 = document.createElement("h3");
+        h3.textContent = song.title || "";
+        card.appendChild(h3);
+
+        var meta = document.createElement("div");
+        meta.style.color = "var(--muted)";
+        var artist = normalize(song.artist) || "Unknown Artist";
+        var genre = normalize(song.genre);
+        meta.textContent = genre ? artist + " � " + genre : artist;
+        card.appendChild(meta);
+
+        var actions = document.createElement("div");
+        actions.style.cssText = "display:flex;gap:8px;margin-top:12px";
+
+        function actionBtn(label, action) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = label;
+          btn.addEventListener("click", function () {
+            if (action === "open") openSong(song.id, card);
+            if (action === "edit") editSong(song.id, card);
+            if (action === "delete") deleteSong(song.id);
           });
-      }
-
-      function showSyncId(binId) {
-        document.getElementById("syncIdDisplay").classList.remove("hidden");
-        document.getElementById("syncIdText").textContent = binId;
-      }
-
-      function loadSyncUi() {
-        var c = getSyncConfig();
-        if (c.key) document.getElementById("syncApiKey").value = c.key;
-        if (c.binId) {
-          document.getElementById("syncBinId").value = c.binId;
-          showSyncId(c.binId);
-          setSyncStatus("Sync ready — " + songs.length + " song(s) local", "ok");
+          return btn;
         }
-      }
 
-      function uid() {
-        if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
-        return Date.now().toString() + Math.random().toString(36).slice(2);
+        actions.appendChild(actionBtn("Open", "open"));
+        actions.appendChild(actionBtn("Edit", "edit"));
+        actions.appendChild(actionBtn("Delete", "delete"));
+        card.appendChild(actions);
+
+        return card;
       }
 
       function render() {
         var q = document.getElementById("search").value.toLowerCase();
+        var mode = groupModeEl.value;
         listEl.textContent = "";
 
         var filtered = songs.filter(function (s) {
-          return (s.title + " " + (s.artist || "") + " " + s.lyrics).toLowerCase().indexOf(q) !== -1;
+          return (s.title + " " + (s.artist || "") + " " + (s.genre || "") + " " + s.lyrics).toLowerCase().indexOf(q) !== -1;
         });
 
         if (!filtered.length) {
@@ -560,36 +408,36 @@
           return;
         }
 
-        filtered.forEach(function (song) {
-          var card = document.createElement("div");
-          card.className = "card";
-          var h3 = document.createElement("h3");
-          h3.textContent = song.title || "";
-          card.appendChild(h3);
-          var artist = document.createElement("div");
-          artist.style.color = "var(--muted)";
-          artist.textContent = song.artist || "";
-          card.appendChild(artist);
-          var actions = document.createElement("div");
-          actions.style.cssText = "display:flex;gap:8px;margin-top:12px";
+        var ordered = sortedSongs(filtered, mode);
+        if (mode === "none") {
+          ordered.forEach(function (song) {
+            listEl.appendChild(renderSongCard(song));
+          });
+          return;
+        }
 
-          function actionBtn(label, action) {
-            var btn = document.createElement("button");
-            btn.type = "button";
-            btn.textContent = label;
-            btn.addEventListener("click", function () {
-              if (action === "open") openSong(song.id, card);
-              if (action === "edit") editSong(song.id, card);
-              if (action === "delete") deleteSong(song.id);
-            });
-            return btn;
+        var groups = {};
+        ordered.forEach(function (song) {
+          var label = groupLabel(song, mode);
+          if (!groups[label]) groups[label] = [];
+          groups[label].push(song);
+        });
+
+        Object.keys(groups).sort(function (a, b) {
+          if (mode === "alpha") {
+            if (a === "#") return 1;
+            if (b === "#") return -1;
           }
+          return a.toLowerCase() < b.toLowerCase() ? -1 : a.toLowerCase() > b.toLowerCase() ? 1 : 0;
+        }).forEach(function (label) {
+          var heading = document.createElement("div");
+          heading.className = "group-heading";
+          heading.textContent = label;
+          listEl.appendChild(heading);
 
-          actions.appendChild(actionBtn("Open", "open"));
-          actions.appendChild(actionBtn("Edit", "edit"));
-          actions.appendChild(actionBtn("Delete", "delete"));
-          card.appendChild(actions);
-          listEl.appendChild(card);
+          groups[label].forEach(function (song) {
+            listEl.appendChild(renderSongCard(song));
+          });
         });
       }
 
@@ -602,6 +450,7 @@
         editing = null;
         document.getElementById("songTitle").value = "";
         document.getElementById("songArtist").value = "";
+        document.getElementById("songGenre").value = "";
         document.getElementById("songLyrics").value = "";
         showPanel(editorEl, toolbarEl);
       }
@@ -612,6 +461,7 @@
         editing = id;
         document.getElementById("songTitle").value = song.title || "";
         document.getElementById("songArtist").value = song.artist || "";
+        document.getElementById("songGenre").value = song.genre || "";
         document.getElementById("songLyrics").value = song.lyrics || "";
         showPanel(editorEl, anchor);
       }
@@ -625,6 +475,7 @@
           id: editing || uid(),
           title: document.getElementById("songTitle").value,
           artist: document.getElementById("songArtist").value,
+          genre: document.getElementById("songGenre").value,
           lyrics: document.getElementById("songLyrics").value
         };
         if (editing) {
@@ -647,8 +498,11 @@
       function openSong(id, anchor) {
         var song = songs.find(function (s) { return s.id === id; });
         if (!song) return;
+        var subtitle = normalize(song.artist) || "Unknown Artist";
+        var genre = normalize(song.genre);
+        if (genre) subtitle += " � " + genre;
         document.getElementById("viewTitle").textContent = song.title || "";
-        document.getElementById("viewArtist").textContent = song.artist || "";
+        document.getElementById("viewArtist").textContent = subtitle;
         document.getElementById("lyrics").textContent = song.lyrics || "";
         updateFont();
         showPanel(viewerEl, anchor);
@@ -661,7 +515,6 @@
       function updateFont() {
         document.getElementById("lyrics").style.fontSize = fontSize + "px";
         localStorage.setItem(STORAGE_FONT, String(fontSize));
-        scheduleCloudPush();
       }
 
       function exportData() {
@@ -687,12 +540,17 @@
             songs = data;
             saveStorage();
             showList();
-            if (syncConfigured()) pushToCloud();
           } catch (e) {
             alert("Invalid backup file.");
           }
         };
         reader.readAsText(file);
+      }
+
+      function toggleMenu(forceOpen) {
+        var open = typeof forceOpen === "boolean" ? forceOpen : menuPanel.classList.contains("hidden");
+        menuPanel.classList.toggle("hidden", !open);
+        btnMenu.setAttribute("aria-expanded", open ? "true" : "false");
       }
 
       document.getElementById("btnNew").addEventListener("click", newSong);
@@ -709,6 +567,10 @@
         if (file) importData(file);
       });
       document.getElementById("search").addEventListener("input", render);
+      groupModeEl.addEventListener("change", function () {
+        localStorage.setItem(STORAGE_GROUP, groupModeEl.value);
+        render();
+      });
       document.getElementById("btnFontDown").addEventListener("click", function () {
         fontSize -= 2;
         updateFont();
@@ -718,38 +580,18 @@
         updateFont();
       });
 
-      document.getElementById("btnSyncSave").addEventListener("click", saveSyncSettings);
-      document.getElementById("btnSyncNew").addEventListener("click", createCloudBackup);
-      document.getElementById("btnSyncNow").addEventListener("click", function () {
-        pullFromCloud(false).then(function () { pushToCloud(); });
+      btnMenu.addEventListener("click", function (e) {
+        e.stopPropagation();
+        toggleMenu();
       });
-      document.getElementById("btnCopySyncId").addEventListener("click", function () {
-        var id = document.getElementById("syncIdText").textContent;
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(id).then(function () {
-            setSyncStatus("Sync ID copied", "ok");
-          });
-        } else {
-          prompt("Copy Sync ID:", id);
+      document.addEventListener("click", function (e) {
+        if (!menuPanel.contains(e.target) && e.target !== btnMenu) {
+          toggleMenu(false);
         }
       });
 
-      document.addEventListener("visibilitychange", function () {
-        if (document.visibilityState === "visible" && syncConfigured()) {
-          pullFromCloud(true);
-        }
-      });
-
-      loadSyncUi();
       showList();
       updateFont();
-
-      if (syncConfigured()) {
-        pullFromCloud(true);
-        setInterval(function () {
-          if (syncConfigured()) pullFromCloud(true);
-        }, 45000);
-      }
     })();
   </script>
 </body>
