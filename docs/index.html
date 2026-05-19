@@ -30,12 +30,17 @@
     }
 
     #app {
-      padding: 18px;
+      padding: 24px 18px 18px;
       max-width: 900px;
       margin: auto;
     }
 
-    h1 { margin: 0 0 14px }
+    h1 { margin: 0 0 18px }
+
+    p {
+      margin: 0 0 14px;
+      line-height: 1.6;
+    }
 
     button, input, textarea, select {
       border: 1px solid var(--line);
@@ -58,6 +63,7 @@
       gap: 10px;
       align-items: center;
       position: relative;
+      padding: 8px 0 16px;
     }
 
     .menu-wrap {
@@ -365,7 +371,7 @@
         meta.style.color = "var(--muted)";
         var artist = normalize(song.artist) || "Unknown Artist";
         var genre = normalize(song.genre);
-        meta.textContent = genre ? artist + " • " + genre : artist;
+        meta.textContent = genre ? artist + " ï¿½ " + genre : artist;
         card.appendChild(meta);
 
         var actions = document.createElement("div");
@@ -500,7 +506,7 @@
         if (!song) return;
         var subtitle = normalize(song.artist) || "Unknown Artist";
         var genre = normalize(song.genre);
-        if (genre) subtitle += " • " + genre;
+        if (genre) subtitle += " ï¿½ " + genre;
         document.getElementById("viewTitle").textContent = song.title || "";
         document.getElementById("viewArtist").textContent = subtitle;
         document.getElementById("lyrics").textContent = song.lyrics || "";
