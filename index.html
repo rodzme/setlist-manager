@@ -19,6 +19,14 @@
       --line: #2d2d31;
       --accent: #f5b342;
     }
+    body[data-theme="light"] {
+      --bg: #f6f6f3;
+      --panel: #ffffff;
+      --text: #1b1b1b;
+      --muted: #666;
+      --line: #d7d7d1;
+      --accent: #cf8c12;
+    }
 
     * { box-sizing: border-box }
 
@@ -98,8 +106,20 @@
       border-radius: 10px;
       padding: 10px;
     }
+    #menuPanel button {
+      width: 100%;
+      text-align: left;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px;
+      background: transparent;
+      color: var(--text);
+      font-size: 16px;
+      cursor: pointer;
+    }
 
-    #menuPanel a:hover {
+    #menuPanel a:hover,
+    #menuPanel button:hover {
       background: #ffffff14;
     }
 
@@ -191,6 +211,7 @@
           <nav id="menuPanel" class="hidden">
             <a href="index.html">Songs</a>
             <a href="config.html">Cloud Sync Settings</a>
+            <button type="button" id="btnTheme">Use Light Theme</button>
           </nav>
         </div>
       </div>
@@ -253,6 +274,7 @@
       var STORAGE_FONT = "fontSize";
       var STORAGE_UPDATED = "songsUpdatedAt";
       var STORAGE_GROUP = "songsGroupMode";
+      var STORAGE_THEME = "appTheme";
 
       var songs = [];
       var localUpdatedAt = 0;
@@ -276,9 +298,18 @@
       var activeCard = null;
       var menuPanel = document.getElementById("menuPanel");
       var btnMenu = document.getElementById("btnMenu");
+      var btnTheme = document.getElementById("btnTheme");
 
       var groupModeEl = document.getElementById("groupMode");
       groupModeEl.value = localStorage.getItem(STORAGE_GROUP) || "none";
+      var theme = localStorage.getItem(STORAGE_THEME) || "dark";
+
+      function applyTheme(nextTheme) {
+        theme = nextTheme === "light" ? "light" : "dark";
+        document.body.setAttribute("data-theme", theme);
+        localStorage.setItem(STORAGE_THEME, theme);
+        btnTheme.textContent = theme === "dark" ? "Use Light Theme" : "Use Dark Theme";
+      }
 
       function clearActiveCard() {
         if (activeCard) {
@@ -590,12 +621,16 @@
         e.stopPropagation();
         toggleMenu();
       });
+      btnTheme.addEventListener("click", function () {
+        applyTheme(theme === "dark" ? "light" : "dark");
+      });
       document.addEventListener("click", function (e) {
         if (!menuPanel.contains(e.target) && e.target !== btnMenu) {
           toggleMenu(false);
         }
       });
 
+      applyTheme(theme);
       showList();
       updateFont();
     })();

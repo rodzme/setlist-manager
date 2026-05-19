@@ -17,6 +17,16 @@
       --ok: #4ade80;
       --err: #f87171;
     }
+    body[data-theme="light"] {
+      --bg: #f6f6f3;
+      --panel: #ffffff;
+      --text: #1b1b1b;
+      --muted: #666;
+      --line: #d7d7d1;
+      --accent: #cf8c12;
+      --ok: #178a44;
+      --err: #b22525;
+    }
 
     * { box-sizing: border-box }
 
@@ -90,8 +100,20 @@
       border-radius: 10px;
       padding: 10px;
     }
+    #menuPanel button {
+      width: 100%;
+      text-align: left;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px;
+      background: transparent;
+      color: var(--text);
+      font-size: 16px;
+      cursor: pointer;
+    }
 
-    #menuPanel a:hover {
+    #menuPanel a:hover,
+    #menuPanel button:hover {
       background: #ffffff14;
     }
 
@@ -155,6 +177,7 @@
         <nav id="menuPanel" class="hidden">
           <a href="index.html">Songs</a>
           <a href="config.html">Cloud Sync Settings</a>
+          <button type="button" id="btnTheme">Use Light Theme</button>
         </nav>
       </div>
     </div>
@@ -192,6 +215,7 @@
       var STORAGE_UPDATED = "songsUpdatedAt";
       var STORAGE_SYNC_KEY = "jsonbinMasterKey";
       var STORAGE_SYNC_BIN = "jsonbinBinId";
+      var STORAGE_THEME = "appTheme";
       var JSONBIN_API = "https://api.jsonbin.io/v3/b";
 
       var songs = [];
@@ -210,6 +234,15 @@
       var syncBusy = false;
       var menuPanel = document.getElementById("menuPanel");
       var btnMenu = document.getElementById("btnMenu");
+      var btnTheme = document.getElementById("btnTheme");
+      var theme = localStorage.getItem(STORAGE_THEME) || "dark";
+
+      function applyTheme(nextTheme) {
+        theme = nextTheme === "light" ? "light" : "dark";
+        document.body.setAttribute("data-theme", theme);
+        localStorage.setItem(STORAGE_THEME, theme);
+        btnTheme.textContent = theme === "dark" ? "Use Light Theme" : "Use Dark Theme";
+      }
 
       function getSyncConfig() {
         return {
@@ -415,12 +448,16 @@
         e.stopPropagation();
         toggleMenu();
       });
+      btnTheme.addEventListener("click", function () {
+        applyTheme(theme === "dark" ? "light" : "dark");
+      });
       document.addEventListener("click", function (e) {
         if (!menuPanel.contains(e.target) && e.target !== btnMenu) {
           toggleMenu(false);
         }
       });
 
+      applyTheme(theme);
       loadSyncUi();
     })();
   </script>
