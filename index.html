@@ -365,7 +365,7 @@
         meta.style.color = "var(--muted)";
         var artist = normalize(song.artist) || "Unknown Artist";
         var genre = normalize(song.genre);
-        meta.textContent = genre ? artist + " • " + genre : artist;
+        meta.textContent = genre ? artist + " ï¿½ " + genre : artist;
         card.appendChild(meta);
 
         var actions = document.createElement("div");
@@ -500,7 +500,7 @@
         if (!song) return;
         var subtitle = normalize(song.artist) || "Unknown Artist";
         var genre = normalize(song.genre);
-        if (genre) subtitle += " • " + genre;
+        if (genre) subtitle += " ï¿½ " + genre;
         document.getElementById("viewTitle").textContent = song.title || "";
         document.getElementById("viewArtist").textContent = subtitle;
         document.getElementById("lyrics").textContent = song.lyrics || "";
